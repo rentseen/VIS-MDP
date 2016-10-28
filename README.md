@@ -8,9 +8,9 @@ Team member: Yelinsheng, Xiaolong Huang
 
 week7 10.26-10.30: Determine what should we do.
 
-week8 10.31-11.6: Learn background knowleadge
+week8 10.31-11.6: Learn MDP [机器学习公开课](http://open.163.com/special/opencourse/machinelearning.html)
 
-week9 11.7-11.13: Learn background knowleadge
+week9 11.7-11.13: Learn 监督学习[机器学习公开课](http://open.163.com/special/opencourse/machinelearning.html)
 
 week10 11.14-11.20:
 
