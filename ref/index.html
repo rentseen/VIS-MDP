@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<link rel="stylesheet" href="slider/d3.slider.css" />  
+<style>
+
+/* graph defaults */
+.node {
+  cursor: pointer;
+}
+
+.node circle {
+  fill: #fff;
+  //stroke: steelblue;
+  stroke: none;
+  stroke-width: 1.5px;
+}
+
+
+.node text {
+  font: 16px sans-serif;
+  text-shadow: -1px -1px 0 #686868,
+               1px -1px 0 #686868,
+               -1px 1px 0 #686868,
+               1px 1px 0 #686868;
+}
+
+.link {
+  fill: none;
+  stroke: #ccc;
+  stroke-width: 1.5px;
+}
+
+div.tooltip {   
+  position: absolute;           
+  text-align: center;           
+  width: 60px;                  
+  height: 28px;                 
+  padding: 2px;             
+  font: 12px sans-serif;        
+  background: lightsteelblue;   
+  border: 0px;      
+  border-radius: 8px;           
+  pointer-events: none;         
+}
+
+/* general */
+#container {
+  margin: 0px auto;
+  padding: 10px 10px;
+  font: sans-serif;
+  /*width: 100%;*/
+}
+
+#viz {
+  background-color: #686868;
+  margin: 0px auto;
+}
+
+.rep {
+  position: absolute;
+  left: 10px;
+  top: 10px;
+
+}
+
+#legends {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  width: 50%;
+  font: 16px sans-serif;
+  color: white;
+  pointer-events: none;
+}
+
+#legends button {
+  margin-left: 50px;
+  pointer-events: auto;
+}
+
+#sliderContainer {
+  position: absolute;
+  right: 75px;
+  top: 100px;
+  height: 25%;
+  width: 20%;
+  font: 16px sans-serif;
+  color: white;
+  pointer-events: none;
+}
+
+
+#sliderContainer  {
+  margin-top: 1em;
+  text-align: right;
+}
+
+#sliderP {
+  float: right;
+  margin-top: 1em;
+  pointer-events: auto;
+}
+
+#slidertext {
+  color: rgb(253, 174, 97);// rgb(215, 48, 39);
+  font-weight: bolder;
+}
+
+.d3-slider-axis text {
+  fill: white;
+  font: .75em sans-serif;
+}
+
+#legend-val {
+  padding: 1.5em 0 0 1.5em;
+}
+
+li.key {
+  border-top-width: 15px;
+  border-top-style: solid;
+  font-size: .75em;
+  width: 8%;
+  padding-left: 0;
+  padding-right: 0;
+  display: inline-block;
+  float: left;
+}
+
+</style>
+<body>
+<div id="container">
+  <div class="rep"></div>
+  <div id="legends">
+    <button id="colorToggle">Toggle color</button>
+    <button id="scaleToggle">Toggle scale</button>
+  </div>
+  
+</div>
+  <div id="sliderContainer">
+    <div>Collapse probability under: <span id="slidertext">0.0</span></div>
+  <div id="sliderP"></div>
+  </div>
+<script src="http://code.jquery.com/jquery-latest.min.js" type="text/javascript"></script>
+<script src="http://d3js.org/d3.v3.min.js" type="text/javascript"></script>
+<script src="slider/d3.slider.js"></script>
+<script src="http://d3js.org/colorbrewer.v1.min.js" type="text/javascript"></script>
+<script src="2drep.js" type="text/javascript"></script>
+<script>
+
+var aspect = 960 / 600;
+//    margin = {top: 20, right: 120, bottom: 20, left: 120},
+    margin = {top: 20, right: 120, bottom: 20, left: 120},
+    width = 960 - margin.right - margin.left,
+    height = width / aspect;
+    
+function updateColors(rewardSetting) {
+    d3.selectAll('path.link').style("stroke", function (d) {
+           return color(colorValue(d.target, rewardSetting)) });
+    d3.selectAll('circle').style("fill", function (d) {
+           return color(colorValue(d, rewardSetting)) });        
+}
+
+function setColorScale(colorSetting, rewardSetting) {
+  if (rewardSetting == 'value' && colorSetting == 'quantile') {
+    color = d3.scale.quantile().domain($.map(Object.keys(valList), function(x) { return parseFloat(x) })).range(colorbrewer.RdYlGn[11]);
+  }
+  else if (rewardSetting == 'acc' && colorSetting == 'quantile') {
+    color = d3.scale.quantile().domain($.map(Object.keys(rewardList), function(x) { return parseFloat(x) })).range(colorbrewer.RdYlGn[11]);
+  }
+  else if (rewardSetting == 'value' && colorSetting == 'quantize') {
+    color = d3.scale.quantize().domain([valRange.min, valRange.max])
+                 .range(colorbrewer.RdYlGn[11]);
+  }
+  else {
+    color = d3.scale.quantize().domain([rewardRange.min, rewardRange.max])
+                .range(colorbrewer.RdYlGn[11]);
+  }
+  // return color;
+  
+}
+
+function updateColorAndLegend(colorSetting, rewardSetting) {
+  setColorScale(colorSetting, rewardSetting);
+  updateColors(rewardSetting);
+  
+  d3.selectAll("#legends li.key").text(function(d) {
+        var r = color.invertExtent(d);
+        return r[0].toFixed(0);
+    });
+  
+  $("#legend-val .header").text(legendHeader(colorSetting, rewardSetting));
+}
+
+function legendHeader(colorSetting, rewardSetting) {
+  t1 = rewardSetting == 'value' ?  'Expected utility value' : 'Accumulated reward';
+  t2 = colorSetting == 'quantile' ? '(quantile scale)' : '(linear scale)';
+  return t1 + ' ' + t2;
+}
+
+$(document).ready(function () {
+  resizeSVG();
+  draw(width, height);
+  $("#colorToggle").click(function() {
+    rewardSetting = rewardSetting == 'acc' ? 'value' : 'acc';
+    updateColorAndLegend(colorSetting, rewardSetting);
+  });
+  
+  $("#scaleToggle").click(function() {
+    colorSetting = colorSetting == 'quantile' ? 'quantize' : 'quantile';
+    updateColorAndLegend(colorSetting, rewardSetting);
+
+  });
+});
+
+var i = 0,
+    duration = 750,
+    color,
+    root,
+    radius;
+
+rewardSetting = 'value';
+colorSetting = 'quantile';
+
+var tree = d3.layout.tree()
+    .size([height, width]);
+	
+// Hardcode based on depth for now (scale based on maxdepth later?)
+var treewidths = {action: 40, state: 180};
+
+valRange =  {min: Infinity, max: -Infinity};
+rewardRange = {min: Infinity, max: -Infinity};
+valList = {};
+rewardList = {};
+
+var diagonal = d3.svg.diagonal()
+    .source( function(d) {
+             if (d.target.type == "state") {
+               // console.log(d.target.poo);
+               if (d.target.poo < 0) {
+                 return {x: d.source.x - radius(parseFloat(d.target.poo) * -1), y: d.source.y};
+               } else {
+                 return {x: d.source.x + radius(parseFloat(d.target.poo)), y: d.source.y};
+		}
+             }
+             return d.source;
+             })
+    .projection(function(d) { return [d.y, d.x]; });
+
+ // Define the zoom function for the zoomable tree
+
+function zoom() {
+  svg.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+}
+
+var zoomListener = d3.behavior.zoom().on("zoom", zoom);
+
+var svg = d3.select("#container").append("svg")
+    .attr("id", "viz")
+    .attr("width", width + margin.right + margin.left)
+    .attr("height", height + margin.top + margin.bottom)
+    .call(zoomListener)
+    .on("dblclick.zoom", null)
+    .append("g")
+      .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+
+tabledata = null;
+
+// d3.json("data/gridworld.json", function(error, flare) {
+d3.json("data/gridworlddepth2.json", function(error, data) {
+d3.csv("data/gridworldtable", function(error, thetabledata) {
+  tabledata = thetabledata;
+  root = data;
+  root.x0 = height / 2 - 500;
+  root.y0 = 0;
+
+  // Find value range
+  for (j = 0; j < tabledata.length; j++) {
+    row = tabledata[j];
+    v = parseFloat(row['value']);
+    valRange.min = (v < valRange.min) ? v : valRange.min;
+    valRange.max = (v > valRange.max) ? v : valRange.max;
+    valList[v] = true;
+  }
+       
+
+  // function collapse(d) {
+  //   if (d.children) {
+  //     d._children = d.children;
+  //     d._children.forEach(collapse);
+  //     d.children = null;
+  //   }
+  // }
+
+  function initRoot(d) {
+    d.value = parseFloat(d.value);
+    d.reward = 0;
+    d.type = "state";
+    d.children = makeChildrenNodes(d, tabledata); // expand actions for first node
+    rewardRange.min = d.reward;
+    rewardRange.max = d.reward;
+
+    rewardList[d.reward] = true;
+  }
+
+  
+  // Parse
+  // function parse(d) {
+  //   d.value = parseFloat(d.value);
+  //   d.prob = parseFloat(d.incomingProbability);
+    // if (d.type == 'state') {
+    //   v = d.value;
+    //   valRange.min = (v < valRange.min) ? v : valRange.min;
+    //   valRange.max = (v > valRange.max) ? v : valRange.max;
+    // } else { 
+    //   v = d.qvalue;
+    //   valRange.min = (v < valRange.min) ? v : valRange.min;
+    //   valRange.max = (v > valRange.max) ? v : valRange.max;
+    // 
+    // };
+    
+    
+  //   if (d.children) {
+  //     d.children.forEach(parse);
+  //   }
+  // }
+  
+  // parse(root);
+
+//  color = d3.scale.quantize().domain([valRange.min, valRange.max])
+//              .range(colorbrewer.RdYlGn[11]);
+  // color = d3.scale.quantile().domain($.map(Object.keys(valList), function(x) { return parseFloat(x) }))
+ //              .range(colorbrewer.RdYlGn[11]);
+  // BUG: check the color scale
+  // console.log(color);
+  color = null;
+  setColorScale(colorSetting, rewardSetting);
+  // color = d3.scale.quantile().domain($.map(Object.keys(valList), function(x) { return parseFloat(x) })).range(colorbrewer.RdYlGn[11]);
+  // console.log(color);
+
+// 
+
+
+  //radius = d3.scale.sqrt()
+  //    .domain([0, 1])
+  //    .range([1,20]);
+
+  radius = d3.scale.linear()
+      .domain([0, 1])
+      .range([0,20]);
+
+  // Display tree
+  // root.children.forEach(collapse);
+  initRoot(root);
+  update(root);
+  
+  // Draw iegend
+  var legend = d3.select("#legends").append('div')
+                .attr('id', 'legend-val');
+  
+  legend.append('span')
+            .attr('class', 'header')
+            .text(legendHeader(colorSetting, rewardSetting));
+  legend.append('ul')
+      .attr('class', 'list-inline');
+
+  var keys = legend.selectAll('li.key')
+      .data(color.range());
+
+  keys.enter().append('li')
+      .attr('class', 'key')
+      .style('border-top-color', String)
+      .text(function(d) {
+          var r = color.invertExtent(d);
+          return r[0].toFixed(0);
+      });
+
+  //Draw slider
+  var slider = d3.select("#sliderP")
+    .call(d3.slider().axis(true).min(1).max(0).value(0)
+    .orientation("vertical").step(0.01)
+    .on("slide", function(evt, value) {
+      d3.select("#slidertext").text((1.0 - value).toFixed(2));
+      // console.log("HUH");
+      // console.log(d3.selectAll("g.node"));
+      filter(root, 1.0 - value);
+      sizeOfWhereToCollapse = 0;
+      for (key in whereToCollapse) {
+        sizeOfWhereToCollapse++;
+      }
+      if (sizeOfWhereToCollapse == 0) {
+        //update(root, null, false);
+      } else {
+            update(root, null, true);
+
+      }
+      whereToCollapse = {};
+      }));				  
+      
+});});
+
+
+
+function colorValue(node, rewardSetting) {
+  if (node.type == "action" && rewardSetting != "acc") {
+    return node.qvalue;
+  }
+  else if (node.type == "action") {
+    return node.qreward;
+  }
+  else if (node.type == "state" && rewardSetting != "acc") {
+    return node.value;
+  }
+  else {
+    return node.reward;
+  }
+}
+
+
+//map from node id to collapse destination
+var whereToCollapse = {};
+
+function filter(source, value) {
+  // console.log("HERE");
+  // console.log(source);
+  if (source.type == "action") { 
+    if (source.children) {
+      source.children.forEach(function (e) {filter(e, value);});
+    }
+  } else {
+    if (source.children) {
+	if (parseFloat(source.incomingProbability) < value && parseFloat(source.incomingProbability) > 0) {
+            stuffToCollapse = {}
+            source.children.forEach(function(e) {whereToCollapse[e.id] = source; stuffToCollapse[e.id] = true; filterAll(e, source);});
+            source._children = source.children;
+            source.children = null;
+            // console.log("UPDATING");
+            // console.log(source);
+            //update(source, stuffToCollapse,  source);
+          
+       } else {
+         source.children.forEach(function (e) {filter(e, value);});
+       }						  
+    }
+  }
+
+}
+
+function filterAll(source, collapseDestination) {
+  // console.log("FILTERING ALL");
+  // console.log(source);
+  if (source.children) {
+    source._children = source.children;
+    source.children = null;
+    stuffToCollapse = {}
+    source._children.forEach(function (e) {whereToCollapse[e.id] = collapseDestination; stuffToCollapse[e.id] = true; filterAll(e, collapseDestination);});
+    
+    //update(source, stuffToCollapse, collapseDestination);
+  }
+}
+
+
+d3.select(self.frameElement).style("height", "800px");
+
+function update(source, stuffToCollapse, isFilter) {
+
+  
+						  
+  // Compute the new tree layout.
+  var nodes = tree.nodes(root).reverse(),
+      links = tree.links(nodes);
+
+  // console.log("UPDATING");
+  // console.log(nodes);
+
+  // Normalize for fixed-depth. Changed to alternate depths depending on action / state nodes.
+  // nodes.forEach(function(d) { d.y = d.depth * 180; });
+  nodes.forEach(function(d) { d.y = Math.floor((d.depth) / 2) * treewidths.state + Math.floor((d.depth+1) / 2) * treewidths.action; });
+
+
+  // Update the nodes…
+  var node = svg.selectAll("g.node")
+      .data(nodes, function(d) { return d.id || (d.id = ++i); });
+
+  // Enter any new nodes at the parent's previous position.
+  var nodeEnter = node.enter().append("g")
+      .attr("class", "node")
+      .attr("transform", function(d) { return "translate(" + source.y0 + "," + source.x0 + ")"; })
+      .on("mouseover", function(d) {
+        if (d.type == "state") {
+          highlightState(d.name);
+          d3.selectAll("circle." + d.name) 
+					      .style("stroke", function(d) {
+                    d._stroke = d.stroke; 
+                    return "black";})
+					      .style("stroke-width", 3);
+                
+          div.transition()
+            .duration(0)
+            .style("opacity", 1)
+            .text(rewardSetting == "acc" ? "R = " + d.reward.toFixed(1) : "V = " + d.value.toFixed(1))
+            .style("left", (d3.event.pageX - 34) + "px")
+            .style("top", (d3.event.pageY - 24) + "px");
+        }
+        else {
+          if (d._children) {
+            highlightAction(d.parent.name, d.name, d._children.map(function (e) {return e.name; }));
+          }
+          else if (d.children) {
+            highlightAction(d.parent.name, d.name, d.children.map(function (e) {return e.name; }));
+          } else {
+            highlightAction(d.parent.name, d.name, getChildren(d.parent.name, d.name));
+          }
+        }
+        
+        
+      })
+      .on("mouseout", function (d)  {
+        if (d.type == "state") {
+          unhighlightState(d.name);
+          d3.selectAll("circle." + d.name) 
+					      .style("stroke", function(d) { return "white"; })
+					      .style("stroke-width", 3);
+          
+          // window.setTimeout(function() {
+            div.transition()
+              .duration(200)
+              .style("opacity", 1e-6);
+              // }, 400);
+        }
+        else {
+          if (d._children) {
+            unhighlightAction(d.parent.name, d.name, d._children.map(function (e) {return e.name; }));
+
+          }
+          else if (d.children) {
+            unhighlightAction(d.parent.name, d.name, d.children.map(function (e) {return e.name; })); 
+          } else {
+            unhighlightAction(d.parent.name, d.name, getChildren(d.parent.name, d.name));}}
+				  
+
+      }) 
+      .on("click", click);
+
+
+  nodeEnter.append("circle")
+      .attr("r", 1e-6)
+      .attr("class", function (d) {return d.name})
+      // .attr("r", function(d) { return (d.type == "action") ? 1e-6 : radius(d.prob / 2) })
+      // .attr("r", function(d) { return (d.type == "action") ? 1e-6 : radius(0.5) })
+      //.style("stroke", function(d) { return d._children ? "lightsteelblue" : "none"; })
+      .style("stroke-width", 3)
+      // .style("fill", function(d) { return d._children ? "lightsteelblue" : "#fff"; })
+      //.style("fill", function(d) { return (d.type == "action") ? "lightsteelblue" : color(d.value); })
+      .style("fill", function(d) { return color(colorValue(d), rewardSetting); })
+      .style("visibility", function(d) {return (d.type == "action") ?  "hidden" : "visible";})
+       //.style("display", function(d) {return (d.type == "action") ?  "none" : "inline";})
+      .style("fill-opacity", function(d) { return (d.type == "action") ? 1.0 : 1.0; })
+    // .append("svg:title")
+    //   .text(function(d) { return d.value; });
+
+  nodeEnter.append("text")
+      //.attr("x", function(d) { return d.children || d._children ? -10 : 10; })
+      //.attr("x", function(d) { return d.type == "action" ? -10 : 10; })
+      .attr("x", function(d) { return d.type == "action" ? -10 : -10; })
+      .attr("dy", ".35em")
+      //.attr("text-anchor", function(d) { return d.children || d._children ? "end" : "start"; })
+      .attr("text-anchor", function(d) { return d.type == "action" ? "end" : "end"; })
+      .text(function(d) { return d.name; })
+      //.style("fill-opacity", 1e-6)
+      //.style("fill", "white")
+      .style("font-weight", function (d) {return (d.type == "action" && d.parent.type == "state" && d.parent.policy == d.name) ? "bold" : ""; })
+      .style("fill", function (d) {return (d.type == "action" && d.parent.type == "state" && d.parent.policy == d.name) ? "gold" : "white"; })
+      .style("fill-opacity", 1);
+
+  // Transition nodes to their new position.
+  var nodeUpdate = node.transition()
+      .duration(duration)
+      .attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; });
+
+  nodeUpdate.select("circle")
+      // .attr("r", 4.5)
+      //.attr("r", function(d) { return (d.type == "action") ? radius(0.01) : radius(d.prob / 2) })
+      .attr("r", function(d) { return (d.type == "action") ? radius(0.01) : radius(0.5) })
+      //.style("stroke", function(d) { return d._children ? "lightsteelblue" : "none"; })
+      .style("stroke", "white")
+      .style("stroke-width", 3)
+      // .style("fill", function(d) { return d._children ? "lightsteelblue" : "#fff"; })
+      //.style("fill", function(d) { return (d.type == "action") ? "lightsteelblue" : color(d.value); })
+    .style("fill", function(d) { return color(colorValue(d, rewardSetting)); })
+            .style("visibility", function(d) {return (d.type == "action") ?  "hidden" : "visible";})
+	//.style("display", function(d) {return (d.type == "action") ?  "none" : "inline";})
+
+      .style("fill-opacity", function(d) { return (d.type == "action") ? 1.0 : 1.0; });
+
+  nodeUpdate.select("text")
+      .style("font-weight", function (d) {return (d.type == "action" && d.parent.type == "state" && d.parent.policy == d.name) ? "bold" : ""; })
+      .style("fill", function (d) {return (d.type == "action" && d.parent.type == "state" && d.parent.policy == d.name) ? "gold" : "white"; })
+      .style("fill-opacity", 1);
+
+  // Transition exiting nodes to the parent's new position.
+  var nodeExit = node.exit().transition()
+      .duration(duration)
+      .attr("transform", function(d) { 
+         if (isFilter) {
+           // console.log("MERP");
+           // console.log(d);
+           // console.log(whereToCollapse);
+           return "translate(" + whereToCollapse[d.id].y + "," + whereToCollapse[d.id].x + ")"; 
+         } else {
+         return "translate(" + source.y + "," + source.x + ")";
+         } })
+      .remove();
+
+  nodeExit.select("circle")
+      .attr("r", 1e-6);
+
+  nodeExit.select("text")
+      .style("fill-opacity", 1e-6);
+
+  // Update the links…
+  var link = svg.selectAll("path.link")
+      .data(links, function(d) { return d.target.id; });
+
+  // Enter any new links at the parent's previous position.
+  link.enter().insert("path", "g")
+      .attr("class", "link")
+      .attr("d", function(d) {
+        var o = {x: source.x0, y: source.y0};
+        return diagonal({source: o, target: o});
+      })
+	  .style("stroke", function(d) {  return color(colorValue(d.target, rewardSetting)); })
+	  .style("stroke-width", function(d) { return d.target.type == "action" ? radius(1.0) : radius(d.target.prob); })
+	  .style("stroke-opacity", function(d) {return d.target.type == "action" ? 1.0 : 1.0;})
+    .on("mouseover", function (d) {
+      d3.select(this).style("stroke", function (d) {
+        return d3.rgb(color(colorValue(d.target, rewardSetting))).darker(1);
+      });
+      if (d.target.type == "action")  {
+        if (d.target._children) {
+          highlightAction(d.source.name, d.target.name, d.target._children.map(function (e) {return e.name; }));
+        }
+        else if (d.target.children){
+          highlightAction(d.source.name, d.target.name, d.target.children.map(function (e) {return e.name; }));
+        }  else {
+          // console.log("HIGHLIGHTING");
+          // console.log(d);
+          // console.log(getChildren(d.source.name, d.target.name));
+          highlightAction(d.source.name, d.target.name, getChildren(d.source.name, d.target.name));
+        }
+        
+
+        div.transition()
+          .duration(0)
+          .style("opacity", 1)
+          .text(rewardSetting == "acc" ? "Q = " + d.target.qreward.toFixed(1) : "Q = " + d.target.qvalue.toFixed(1))
+          .style("left", (d3.event.pageX - 34) + "px")
+          .style("top", (d3.event.pageY - 24) + "px"); 
+      }
+      else {
+        highlightOneAction(d.source.parent.name, d.name, d.target.name);
+        div.transition()
+          .duration(0)
+          .style("opacity", 1)
+          .text("P = " + d.target.prob)
+          .style("left", (d3.event.pageX - 34) + "px")
+          .style("top", (d3.event.pageY - 24) + "px");
+        
+      
+      }
+      // tooltip
+
+
+      })
+    .on("mouseout", function (d) {
+      d3.select(this).style("stroke", function (d) {
+        return color(colorValue(d.target, rewardSetting));
+      });
+
+      if (d.target.type == "action")  {
+        if (d.target._children) {
+          unhighlightAction(d.source.name, d.target.name, d.target._children.map(function (e) {return e.name; }));
+        }
+        else if (d.target.children){
+          unhighlightAction(d.source.name, d.target.name, d.target.children.map(function (e) {return e.name; }));
+        } else {
+          unhighlightAction(d.source.name, d.target.name, getChildren(d.source.name,d.target.name));
+        }
+      }
+      else {
+        unhighlightOneAction(d.source.parent.name, d.name, d.target.name);
+   
+      }
+    
+      
+      // window.setTimeout(function() {
+        div.transition()
+          .duration(200)
+          .style("opacity", 1e-6);
+          // }, 400);
+      
+    })
+    .on("click", function(d) {click(d.target);});
+
+
+  // Transition links to their new position.
+  link.transition()
+      .duration(duration)
+      .attr("d", diagonal);
+
+  // Transition exiting nodes to the parent's new position.
+  link.exit().transition()
+      .duration(duration)
+      .attr("d", function(d) {
+        var o = {x: source.x, y: source.y};
+        // console.log("transitioning link");
+        // console.log(d);
+        // console.log(o);
+        // console.log(isFilter);
+	if (isFilter) {
+          // console.log("IS FILTER");
+          // console.log(stuffToCollapse);
+          //if (d.target.id in stuffToCollapse) {
+	    return diagonal({source: whereToCollapse[d.target.id], target: whereToCollapse[d.target.id]});
+          //}
+        } else {
+          return diagonal({source: o, target: o});
+        }
+      })
+      .remove();
+
+  // Stash the old positions for transition.
+  nodes.forEach(function(d) {
+    d.x0 = d.x;
+    d.y0 = d.y;
+  });
+}
+
+function getChildren(state, action) {
+     states = [];		  
+     for (j = 0; j < tabledata.length; j++) {
+	row = tabledata[j];
+	if (row['state1'] == state && row['action'] == action) {
+          // console.log("STATE!");
+          // console.log(row['state2']);
+          states.push(row['state2']);
+      }}
+      // console.log("HUHH?");
+      // console.log(states);
+      return states;
+}
+
+// Toggle children on click.
+function click(d) {
+  if (!d.children && !d._children) {
+    //d3.csv("data/gridworldtable", function(error, tabledata) {
+      // console.log("HERE TABLE");
+      d.children = makeChildrenNodes(d, tabledata);
+      // console.log(d.children);
+      // console.log("THERE");
+      // update(d);
+   // });
+  }
+  else if (d.children) {
+    d._children = d.children;
+    d.children = null;
+  } else {
+    d.children = d._children;
+    d._children = null;
+  }
+  // console.log("CALL TO UPDATE");
+  // console.log(d)
+  update(d);
+}
+
+
+function makeChildrenNodes(node, data) {
+  // console.log("MAKING CHILDREN");
+  // console.log(node);
+  if (node.type == 'state') {
+    children = []
+    actions = {}
+    for (j = 0; j < data.length; j++) {
+      row = data[j];
+      if (row['state1'] == node.name && !(row['action'] in actions)) {
+        newNode = {};
+        newNode['name'] = row['action'];
+        actions[row['action']] = true
+        newNode['type'] = 'action';
+        //newNode['value'] = row['value'];
+        newNode['qvalue'] = parseFloat(row['qvalue']);
+        newNode['qreward_inc'] = parseFloat(row['qreward']);
+        newNode['qreward'] = node['reward'] + parseFloat(row['qreward']);
+        children.push(newNode);
+
+        // update rewardRange
+        rewardRange.min = Math.min(rewardRange.min, newNode['qreward']);
+        rewardRange.max = Math.max(rewardRange.max, newNode['qreward']);
+
+        // BUG: change to dictionary?
+        rewardList[newNode['qreward']] = true;
+      }
+    } 
+  } else {
+    children = []
+    for (j = 0; j < data.length; j++) {
+     row = data[j];
+      if (row['action'] == node.name && row['state1'] == node.parent.name) {
+      	newNode = {};
+        newNode['name'] = row['state2'];
+        newNode['type'] = 'state';
+        newNode['value'] = parseFloat(row['value']);
+        newNode['reward'] = node.parent['reward'] + parseFloat(row['reward']);
+        newNode['reward_inc'] = parseFloat(row['reward']);
+        //newNode['qvalue'] = row['qvalue'];
+        newNode['prob'] = parseFloat(row['incomingProbability']);
+        newNode['incomingProbability'] = parseFloat(row['incomingProbability']);
+        newNode['poo'] = row['poo'];
+      	newNode['policy'] = row['bestAction'];
+        children.push(newNode);
+
+        // update rewardRange
+        rewardRange.min = Math.min(rewardRange.min, newNode['reward']);
+        rewardRange.max = Math.max(rewardRange.max, newNode['reward']);
+
+        // BUG: change to dictionary?
+        rewardList[newNode['reward']] = true;
+      }
+    }
+    
+  }
+  // console.log("HERE ARE THE CHILDREN");
+  // console.log(children);
+  
+  updateColorAndLegend(colorSetting, rewardSetting);
+  
+  return children; 
+}
+
+
+function highlightLinks(source) {
+  
+}
+function highlightNodes(state) {
+  d3.selectAll("circle." + state) 
+				  .style("stroke", 
+				  function(d) {
+				  d._stroke = d.stroke; 
+				  return "black";})
+				  .style("stroke-width", 3);
+}
+
+function unhighlightNodes(state) {
+d3.selectAll("circle." + state) 
+				  .style("stroke", 
+				  function(d) {
+				  return "white";})
+				  .style("stroke-width", 3);
+}
+
+function getWidth() {
+  // console.log($"#container");
+  var width = Math.max(960, $("#container").width());
+
+  return width;
+}
+
+function resizeSVG() {
+  var width = getWidth();
+  d3.select("#viz")
+          .attr("width", width)
+          .attr("height", width / aspect);
+}
+
+$(window).on("resize", resizeSVG);
+
+var div = d3.select("body").append("div")
+    .attr("class", "tooltip")
+    .style("opacity", 1e-6);
+
+</script>
