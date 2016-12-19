@@ -119,6 +119,19 @@ def outputPolicyTreeToJSON(mdp, state, action, isBestAction, prob, v,
 
 def outputToJSON(mdp, state, action, prob, v, 
                  policy, depth, isState, pointOfOrigin):
+    """
+
+    :param mdp: GridWorld
+    :param state: 初始state
+    :param action:
+    :param prob: 初始state的incoming prob
+    :param v: mdp的state value
+    :param policy: 最优策略
+    :param depth: 深度
+    :param isState:
+    :param pointOfOrigin:
+    :return:
+    """
     json = {}
     if isState:
         json['name'] = mdp.getStateString(state)

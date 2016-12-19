@@ -10,17 +10,27 @@ class GridWorld:
         self.firepitreward = firepitreward
         self.pFailure = pFailure
         self.pSuccess = 1.0 - (2.0 * pFailure)
+        #折现因子，gama
         self.discount = discount
 
     
     def getInitialState(self):
+        """获取初始状态
+        """
         return (0,0)
 
     def getStateString(self, state):
+        """
+        将状态元组转换成字符串
+        """
         (x, y) = state
         return "s%d-%d" % (x, y)
  
     def getStates(self):
+        """
+        获取所有的状态
+        :return:
+        """
         states = []
         for i in range(self.x):
             for j in range(self.y):
@@ -30,6 +40,9 @@ class GridWorld:
         return states
 
     def getActions(self, state):
+        """
+        对于每个状态，返回相应可行的动作
+        """
         (x,y) = state
         actions = []
         if (x,y) == (2, 0):
@@ -56,6 +69,9 @@ class GridWorld:
             return False
 
     def getReward(self, state):
+        """
+        获取各状态的reward
+        """
         (x, y) = state
         if (x, y) == (self.x - 1,  0):
             return self.reward
@@ -95,6 +111,9 @@ class GridWorld:
                 return (x,y)
 
     def getT(self, state, action):
+        """
+        获取执行相应动作后的下一状态的概率
+        """
         nextStates = {}
 
         #print state

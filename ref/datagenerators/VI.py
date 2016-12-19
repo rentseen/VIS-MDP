@@ -1,7 +1,7 @@
-
-
-
 def getQValue(mdp, state, a, V):
+    """
+    Q值，即在s下采取动作a算得的Vs
+    """
     nextStates = mdp.getT(state, a)
     q = 0.0
     for (nextState, p) in nextStates:
@@ -10,6 +10,9 @@ def getQValue(mdp, state, a, V):
     return q
 
 def runVI(mdp):
+    """
+    值迭代
+    """
     states = mdp.getStates()
     V = {}
 
@@ -32,6 +35,10 @@ def runVI(mdp):
     return V
 
 def getPolicy(mdp, V):
+    """
+    获取最优policy
+    :return: 字典
+    """
     states = mdp.getStates()
     policy = {}
     for state in states:
