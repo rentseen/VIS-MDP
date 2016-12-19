@@ -30,17 +30,17 @@
   stroke-width: 1.5px;
 }
 
-div.tooltip {   
-  position: absolute;           
-  text-align: center;           
-  width: 60px;                  
-  height: 28px;                 
-  padding: 2px;             
-  font: 12px sans-serif;        
-  background: lightsteelblue;   
-  border: 0px;      
-  border-radius: 8px;           
-  pointer-events: none;         
+div.tooltip {
+  position: absolute;
+  text-align: center;
+  width: 60px;
+  height: 28px;
+  padding: 2px;
+  font: 12px sans-serif;
+  background: lightsteelblue;
+  border: 0px;
+  border-radius: 8px;
+  pointer-events: none;
 }
 
 /* general */
@@ -130,11 +130,46 @@ li.key {
 <body>
 <div id="container">
   <div class="rep"></div>
+  <div class="boxnine">
+        <div class="boxrow">
+            <div class="boxone">
+                <input type="text" name="box02" value="-10">
+            </div>
+            <div class="boxone">
+                <input type="text" name="box12" value="-10">
+            </div>
+            <div class="boxone">
+                <input type="text" name="box22" value="-10">
+            </div>
+        </div>
+        <div class="boxrow">
+            <div class="boxone">
+                <input type="text" name="box01" value="-10">
+            </div>
+            <div class="boxone">
+                <input type="text" name="box11" value="-10">
+            </div>
+            <div class="boxone">
+                <input type="text" name="box21" value="-10">
+            </div>
+        </div>
+        <div class="boxrow">
+            <div class="boxone">
+                <input type="text" name="box00" value="-10">
+            </div>
+            <div class="boxone">
+                <input type="text" name="box10" value="-10">
+            </div>
+            <div class="boxone">
+                <input type="text" name="box20" value="-10">
+            </div>
+        </div>
+  </div>
   <div id="legends">
     <button id="colorToggle">Toggle color</button>
     <button id="scaleToggle">Toggle scale</button>
   </div>
-  
+
 </div>
   <div id="sliderContainer">
     <div>Collapse probability under: <span id="slidertext">0.0</span></div>
@@ -152,12 +187,12 @@ var aspect = 960 / 600;
     margin = {top: 20, right: 120, bottom: 20, left: 120},
     width = 960 - margin.right - margin.left,
     height = width / aspect;
-    
+
 function updateColors(rewardSetting) {
     d3.selectAll('path.link').style("stroke", function (d) {
            return color(colorValue(d.target, rewardSetting)) });
     d3.selectAll('circle').style("fill", function (d) {
-           return color(colorValue(d, rewardSetting)) });        
+           return color(colorValue(d, rewardSetting)) });
 }
 
 function setColorScale(colorSetting, rewardSetting) {
@@ -176,18 +211,18 @@ function setColorScale(colorSetting, rewardSetting) {
                 .range(colorbrewer.RdYlGn[11]);
   }
   // return color;
-  
+
 }
 
 function updateColorAndLegend(colorSetting, rewardSetting) {
   setColorScale(colorSetting, rewardSetting);
   updateColors(rewardSetting);
-  
+
   d3.selectAll("#legends li.key").text(function(d) {
         var r = color.invertExtent(d);
         return r[0].toFixed(0);
     });
-  
+
   $("#legend-val .header").text(legendHeader(colorSetting, rewardSetting));
 }
 
@@ -204,7 +239,7 @@ $(document).ready(function () {
     rewardSetting = rewardSetting == 'acc' ? 'value' : 'acc';
     updateColorAndLegend(colorSetting, rewardSetting);
   });
-  
+
   $("#scaleToggle").click(function() {
     colorSetting = colorSetting == 'quantile' ? 'quantize' : 'quantile';
     updateColorAndLegend(colorSetting, rewardSetting);
@@ -223,7 +258,7 @@ colorSetting = 'quantile';
 
 var tree = d3.layout.tree()
     .size([height, width]);
-	
+
 // Hardcode based on depth for now (scale based on maxdepth later?)
 var treewidths = {action: 40, state: 180};
 
@@ -281,7 +316,7 @@ d3.csv("/reward/gridworldtable", function(error, thetabledata) {
     valRange.max = (v > valRange.max) ? v : valRange.max;
     valList[v] = true;
   }
-       
+
 
   // function collapse(d) {
   //   if (d.children) {
@@ -302,7 +337,7 @@ d3.csv("/reward/gridworldtable", function(error, thetabledata) {
     rewardList[d.reward] = true;
   }
 
-  
+
   // Parse
   // function parse(d) {
   //   d.value = parseFloat(d.value);
@@ -311,19 +346,19 @@ d3.csv("/reward/gridworldtable", function(error, thetabledata) {
     //   v = d.value;
     //   valRange.min = (v < valRange.min) ? v : valRange.min;
     //   valRange.max = (v > valRange.max) ? v : valRange.max;
-    // } else { 
+    // } else {
     //   v = d.qvalue;
     //   valRange.min = (v < valRange.min) ? v : valRange.min;
     //   valRange.max = (v > valRange.max) ? v : valRange.max;
-    // 
+    //
     // };
-    
-    
+
+
   //   if (d.children) {
   //     d.children.forEach(parse);
   //   }
   // }
-  
+
   // parse(root);
 
 //  color = d3.scale.quantize().domain([valRange.min, valRange.max])
@@ -337,7 +372,7 @@ d3.csv("/reward/gridworldtable", function(error, thetabledata) {
   // color = d3.scale.quantile().domain($.map(Object.keys(valList), function(x) { return parseFloat(x) })).range(colorbrewer.RdYlGn[11]);
   // console.log(color);
 
-// 
+//
 
 
   //radius = d3.scale.sqrt()
@@ -352,11 +387,11 @@ d3.csv("/reward/gridworldtable", function(error, thetabledata) {
   // root.children.forEach(collapse);
   initRoot(root);
   update(root);
-  
+
   // Draw iegend
   var legend = d3.select("#legends").append('div')
                 .attr('id', 'legend-val');
-  
+
   legend.append('span')
             .attr('class', 'header')
             .text(legendHeader(colorSetting, rewardSetting));
@@ -394,8 +429,8 @@ d3.csv("/reward/gridworldtable", function(error, thetabledata) {
 
       }
       whereToCollapse = {};
-      }));				  
-      
+      }));
+
 });});
 
 
@@ -422,7 +457,7 @@ var whereToCollapse = {};
 function filter(source, value) {
   // console.log("HERE");
   // console.log(source);
-  if (source.type == "action") { 
+  if (source.type == "action") {
     if (source.children) {
       source.children.forEach(function (e) {filter(e, value);});
     }
@@ -436,10 +471,10 @@ function filter(source, value) {
             // console.log("UPDATING");
             // console.log(source);
             //update(source, stuffToCollapse,  source);
-          
+
        } else {
          source.children.forEach(function (e) {filter(e, value);});
-       }						  
+       }
     }
   }
 
@@ -453,7 +488,7 @@ function filterAll(source, collapseDestination) {
     source.children = null;
     stuffToCollapse = {}
     source._children.forEach(function (e) {whereToCollapse[e.id] = collapseDestination; stuffToCollapse[e.id] = true; filterAll(e, collapseDestination);});
-    
+
     //update(source, stuffToCollapse, collapseDestination);
   }
 }
@@ -463,8 +498,8 @@ d3.select(self.frameElement).style("height", "800px");
 
 function update(source, stuffToCollapse, isFilter) {
 
-  
-						  
+
+
   // Compute the new tree layout.
   var nodes = tree.nodes(root).reverse(),
       links = tree.links(nodes);
@@ -488,12 +523,12 @@ function update(source, stuffToCollapse, isFilter) {
       .on("mouseover", function(d) {
         if (d.type == "state") {
           highlightState(d.name);
-          d3.selectAll("circle." + d.name) 
+          d3.selectAll("circle." + d.name)
 					      .style("stroke", function(d) {
-                    d._stroke = d.stroke; 
+                    d._stroke = d.stroke;
                     return "black";})
 					      .style("stroke-width", 3);
-                
+
           div.transition()
             .duration(0)
             .style("opacity", 1)
@@ -511,16 +546,16 @@ function update(source, stuffToCollapse, isFilter) {
             highlightAction(d.parent.name, d.name, getChildren(d.parent.name, d.name));
           }
         }
-        
-        
+
+
       })
       .on("mouseout", function (d)  {
         if (d.type == "state") {
           unhighlightState(d.name);
-          d3.selectAll("circle." + d.name) 
+          d3.selectAll("circle." + d.name)
 					      .style("stroke", function(d) { return "white"; })
 					      .style("stroke-width", 3);
-          
+
           // window.setTimeout(function() {
             div.transition()
               .duration(200)
@@ -533,12 +568,12 @@ function update(source, stuffToCollapse, isFilter) {
 
           }
           else if (d.children) {
-            unhighlightAction(d.parent.name, d.name, d.children.map(function (e) {return e.name; })); 
+            unhighlightAction(d.parent.name, d.name, d.children.map(function (e) {return e.name; }));
           } else {
             unhighlightAction(d.parent.name, d.name, getChildren(d.parent.name, d.name));}}
-				  
 
-      }) 
+
+      })
       .on("click", click);
 
 
@@ -600,12 +635,12 @@ function update(source, stuffToCollapse, isFilter) {
   // Transition exiting nodes to the parent's new position.
   var nodeExit = node.exit().transition()
       .duration(duration)
-      .attr("transform", function(d) { 
+      .attr("transform", function(d) {
          if (isFilter) {
            // console.log("MERP");
            // console.log(d);
            // console.log(whereToCollapse);
-           return "translate(" + whereToCollapse[d.id].y + "," + whereToCollapse[d.id].x + ")"; 
+           return "translate(" + whereToCollapse[d.id].y + "," + whereToCollapse[d.id].x + ")";
          } else {
          return "translate(" + source.y + "," + source.x + ")";
          } })
@@ -647,14 +682,14 @@ function update(source, stuffToCollapse, isFilter) {
           // console.log(getChildren(d.source.name, d.target.name));
           highlightAction(d.source.name, d.target.name, getChildren(d.source.name, d.target.name));
         }
-        
+
 
         div.transition()
           .duration(0)
           .style("opacity", 1)
           .text(rewardSetting == "acc" ? "Q = " + d.target.qreward.toFixed(1) : "Q = " + d.target.qvalue.toFixed(1))
           .style("left", (d3.event.pageX - 34) + "px")
-          .style("top", (d3.event.pageY - 24) + "px"); 
+          .style("top", (d3.event.pageY - 24) + "px");
       }
       else {
         highlightOneAction(d.source.parent.name, d.name, d.target.name);
@@ -664,8 +699,8 @@ function update(source, stuffToCollapse, isFilter) {
           .text("P = " + d.target.prob)
           .style("left", (d3.event.pageX - 34) + "px")
           .style("top", (d3.event.pageY - 24) + "px");
-        
-      
+
+
       }
       // tooltip
 
@@ -688,16 +723,16 @@ function update(source, stuffToCollapse, isFilter) {
       }
       else {
         unhighlightOneAction(d.source.parent.name, d.name, d.target.name);
-   
+
       }
-    
-      
+
+
       // window.setTimeout(function() {
         div.transition()
           .duration(200)
           .style("opacity", 1e-6);
           // }, 400);
-      
+
     })
     .on("click", function(d) {click(d.target);});
 
@@ -736,7 +771,7 @@ function update(source, stuffToCollapse, isFilter) {
 }
 
 function getChildren(state, action) {
-     states = [];		  
+     states = [];
      for (j = 0; j < tabledata.length; j++) {
 	row = tabledata[j];
 	if (row['state1'] == state && row['action'] == action) {
@@ -799,7 +834,7 @@ function makeChildrenNodes(node, data) {
         // BUG: change to dictionary?
         rewardList[newNode['qreward']] = true;
       }
-    } 
+    }
   } else {
     children = []
     for (j = 0; j < data.length; j++) {
@@ -826,32 +861,32 @@ function makeChildrenNodes(node, data) {
         rewardList[newNode['reward']] = true;
       }
     }
-    
+
   }
   // console.log("HERE ARE THE CHILDREN");
   // console.log(children);
-  
+
   updateColorAndLegend(colorSetting, rewardSetting);
-  
-  return children; 
+
+  return children;
 }
 
 
 function highlightLinks(source) {
-  
+
 }
 function highlightNodes(state) {
-  d3.selectAll("circle." + state) 
-				  .style("stroke", 
+  d3.selectAll("circle." + state)
+				  .style("stroke",
 				  function(d) {
-				  d._stroke = d.stroke; 
+				  d._stroke = d.stroke;
 				  return "black";})
 				  .style("stroke-width", 3);
 }
 
 function unhighlightNodes(state) {
-d3.selectAll("circle." + state) 
-				  .style("stroke", 
+d3.selectAll("circle." + state)
+				  .style("stroke",
 				  function(d) {
 				  return "white";})
 				  .style("stroke-width", 3);
