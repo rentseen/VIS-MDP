@@ -11,9 +11,10 @@ function draw(width, height) {
 	    s.append("rect")
 		.attr("width", boxHeight)
 	        .attr("class", "rep")
+            .attr("id","sb"+(j*3+k+1))
 	        .attr("name", "s" + k + "-" + j)
 	        .attr("height", boxWidth)
-	        .attr("transform", "translate(" +  k * boxHeight + "," + 
+	        .attr("transform", "translate(" +  k * boxHeight + "," +
 		      (2-j)*boxWidth + ")")
 	        .style("stroke", "#686868")
 	        .style("stroke-width", "1px")
@@ -36,9 +37,9 @@ function draw(width, height) {
 		    unhighlightNodes(this.getAttribute("name"));});
 	    s.append("text")
             .text("FIRE PIT")
-	        .attr("transform", "translate(" +  k * boxHeight + "," + 
+	        .attr("transform", "translate(" +  k * boxHeight + "," +
 		      (2-j)*boxWidth + ")")
-	        //.attr("x", k * boxHeight) 
+	        //.attr("x", k * boxHeight)
 		//.attr("y", (2-j) * boxWidth)
 	        .attr("text-anchor", "end")
 	        .style("fill-opacity", 1.0)
@@ -87,7 +88,7 @@ function highlightAction(state, action, states) {
 	    }
 	    rects[k].style.fill = "black";
 	}
-	
+
     }
 }
 
@@ -110,7 +111,7 @@ function unhighlightAction(state, action, states) {
 
 	    }
 	}
-	
+
     }
 }
 
@@ -137,7 +138,7 @@ function unhighlightOneAction(state, action, nextState) {
 	if (rects[k].getAttribute("name") == nextState) {
 	    rects[k].style.fill = rects[k].style._fill;
 	    rects[k].style._fill = null;
-	} 
+	}
 	if (rects[k].getAttribute("name") == state) {
 	    if (rects[k].style._fill) {
 		rects[k].style.fill = rects[k].style._fill;
