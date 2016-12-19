@@ -265,9 +265,9 @@ var svg = d3.select("#container").append("svg")
 
 tabledata = null;
 
-// d3.json("/static/data/gridworld.json", function(error, flare) {
-d3.json("/static/data/gridworlddepth2.json", function(error, data) {
-d3.csv("/static/data/gridworldtable", function(error, thetabledata) {
+// d3.json("/reward/data/gridworld.json", function(error, flare) {
+d3.json("/reward/depth2", function(error, data) {
+d3.csv("/reward/gridworldtable", function(error, thetabledata) {
   tabledata = thetabledata;
   root = data;
   root.x0 = height / 2 - 500;

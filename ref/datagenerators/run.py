@@ -1,3 +1,5 @@
+# coding=utf-8
+
 from GridWorld import *
 from VI import *
 import json
@@ -57,7 +59,7 @@ def outputTable(mdp, v):
                                                        nextPointOfOrigin, p))
 
 
-def outputPolicyTreeToJSON(mdp, state, action, isBestAction, prob, v, 
+def outputPolicyTreeToJSON(mdp, state, action, isBestAction, prob, v,
                  policy, depth, isState, pointOfOrigin):
     json = {}
     if isState:
@@ -75,10 +77,10 @@ def outputPolicyTreeToJSON(mdp, state, action, isBestAction, prob, v,
                     bestActionQValue = qvalue
             for a in mdp.getActions(state):
                 if a == bestAction:
-                    actions.append(outputPolicyTreeToJSON(mdp, state, a, True,  0, 
+                    actions.append(outputPolicyTreeToJSON(mdp, state, a, True,  0,
                                                 v, policy, depth, False, 0))
                 else:
-                    actions.append(outputPolicyTreeToJSON(mdp, state, a, False, 0, 
+                    actions.append(outputPolicyTreeToJSON(mdp, state, a, False, 0,
                                                 v, policy, depth, False, 0))
 
             json['policy'] = bestAction
@@ -88,7 +90,7 @@ def outputPolicyTreeToJSON(mdp, state, action, isBestAction, prob, v,
     else:
         json['name'] = str(action)
         json['value'] = "0"
-        
+
         states = []
         qvalue = 0.0
 
@@ -100,7 +102,7 @@ def outputPolicyTreeToJSON(mdp, state, action, isBestAction, prob, v,
                 nextPointOfOrigin = lastPointOfOrigin + p / 2
                 lastPointOfOrigin += p
 
-                states.append(outputPolicyTreeToJSON(mdp, s, None, False, p, 
+                states.append(outputPolicyTreeToJSON(mdp, s, None, False, p,
                                            v, policy, depth-1, True,
                                            nextPointOfOrigin))
                 qvalue += p * v[s]
@@ -111,19 +113,19 @@ def outputPolicyTreeToJSON(mdp, state, action, isBestAction, prob, v,
 
         json['qvalue'] = qvalue
 
-        
+
         json['children'] = states
         json['type'] = "action"
-    
+
     return json
 
-def outputToJSON(mdp, state, action, prob, v, 
+def outputToJSON(mdp, state, action, prob, v,
                  policy, depth, isState, pointOfOrigin):
     """
 
     :param mdp: GridWorld
     :param state: 初始state
-    :param action:
+    :param action: action
     :param prob: 初始state的incoming prob
     :param v: mdp的state value
     :param policy: 最优策略
@@ -148,7 +150,7 @@ def outputToJSON(mdp, state, action, prob, v,
                 bestActionQValue = qvalue
         if depth > 0:
             for a in mdp.getActions(state):
-                actions.append(outputToJSON(mdp, state, a, 0, 
+                actions.append(outputToJSON(mdp, state, a, 0,
                                             v, policy, depth, False, 0))
             json['children'] = actions
         json['policy'] = bestAction
@@ -157,7 +159,7 @@ def outputToJSON(mdp, state, action, prob, v,
     else:
         json['name'] = str(action)
         json['value'] = "0"
-        
+
         states = []
         qvalue = 0.0
 
@@ -168,17 +170,17 @@ def outputToJSON(mdp, state, action, prob, v,
             nextPointOfOrigin = lastPointOfOrigin + p / 2
             lastPointOfOrigin += p
 
-            states.append(outputToJSON(mdp, s, None, p, 
+            states.append(outputToJSON(mdp, s, None, p,
                                        v, policy, depth-1, True,
                                        nextPointOfOrigin))
             qvalue += p * v[s]
 
         json['qvalue'] = qvalue
 
-        
+
         json['children'] = states
         json['type'] = "action"
-    
+
     return json
 
 gridworld = GridWorld(3, 3, -10, 100, -10000, 0.1, 1.0)
@@ -190,12 +192,12 @@ print policy
 f = open('../data/gridworldpolicytreedepth5.json', 'w')
 f2 = open('../data/gridworlddepth2.json', 'w')
 
-f2.write(json.dumps(outputToJSON(gridworld, gridworld.getInitialState(), None, 1.0, 
+f2.write(json.dumps(outputToJSON(gridworld, gridworld.getInitialState(), None, 1.0,
              v, policy, 2, True, 0)))
 
 
 
-f.write(json.dumps(outputPolicyTreeToJSON(gridworld, gridworld.getInitialState(), 
+f.write(json.dumps(outputPolicyTreeToJSON(gridworld, gridworld.getInitialState(),
                                 None, False, 1.0, v, policy, 5, True, 0),
                    indent=4))
 

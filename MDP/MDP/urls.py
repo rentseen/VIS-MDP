@@ -1,3 +1,5 @@
+# coding=utf-8
+
 """MDP URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
@@ -17,8 +19,11 @@ from django.conf.urls import url
 from django.contrib import admin
 
 from django.conf.urls import *
-from MDP.views import index
+from MDP.views import index,computeDepthJson
+from MDP.views import index,computeTableJson
 
 urlpatterns = [
     url(r'^$', index),
+    url(r'^reward/depth2$',computeDepthJson),
+    url(r'^reward/gridworldtable',computeTableJson),
 ]

@@ -1,3 +1,5 @@
+# coding=utf-8
+
 def getQValue(mdp, state, a, V):
     """
     Q值，即在s下采取动作a算得的Vs
@@ -27,11 +29,11 @@ def runVI(mdp):
         newV = {}
         for state in states:
             v = V[state]
-            newV[state] = max([getQValue(mdp, state, a, V) 
+            newV[state] = max([getQValue(mdp, state, a, V)
                                for a in mdp.getActions(state)])
             delta = max((delta, abs(v - newV[state])))
         V = newV
-    
+
     return V
 
 def getPolicy(mdp, V):
@@ -52,4 +54,3 @@ def getPolicy(mdp, V):
         policy[state] = bestAction
 
     return policy
-

@@ -1,7 +1,7 @@
 # coding=utf-8
 
 class GridWorld:
-
+    
     def __init__(self, x, y, cost, reward, firepitreward, pFailure, discount):
         self.x = x
         self.y = y
@@ -13,7 +13,7 @@ class GridWorld:
         #折现因子，gama
         self.discount = discount
 
-
+    
     def getInitialState(self):
         """获取初始状态
         """
@@ -25,7 +25,7 @@ class GridWorld:
         """
         (x, y) = state
         return "s%d-%d" % (x, y)
-
+ 
     def getStates(self):
         """
         获取所有的状态
@@ -36,7 +36,7 @@ class GridWorld:
             for j in range(self.y):
               states.append((i, j))
         states.append((-1,-1))
-
+        
         return states
 
     def getActions(self, state):
@@ -81,7 +81,7 @@ class GridWorld:
             return 0
         else:
             return self.cost
-
+        
 
     #assuming the action works perfectly, what is the next state?
     def getNextState(self, state, action):
@@ -123,7 +123,7 @@ class GridWorld:
             nextStates[self.getNextState(state, 'N')] = 0.0
             nextStates[self.getNextState(state, 'E')] = 0.0
             nextStates[self.getNextState(state, 'W')] = 0.0
-
+            
             nextStates[self.getNextState(state, 'N')] += self.pSuccess
             nextStates[self.getNextState(state, 'E')] += self.pFailure
             nextStates[self.getNextState(state, 'W')] += self.pFailure
@@ -131,7 +131,7 @@ class GridWorld:
             nextStates[self.getNextState(state, 'S')] = 0.0
             nextStates[self.getNextState(state, 'E')] = 0.0
             nextStates[self.getNextState(state, 'W')] = 0.0
-
+            
             nextStates[self.getNextState(state, 'S')] += self.pSuccess
             nextStates[self.getNextState(state, 'E')] += self.pFailure
             nextStates[self.getNextState(state, 'W')] += self.pFailure
@@ -140,7 +140,7 @@ class GridWorld:
             nextStates[self.getNextState(state, 'N')] = 0.0
             nextStates[self.getNextState(state, 'E')] = 0.0
             nextStates[self.getNextState(state, 'S')] = 0.0
-
+            
             nextStates[self.getNextState(state, 'N')] += self.pFailure
             nextStates[self.getNextState(state, 'E')] += self.pSuccess
             nextStates[self.getNextState(state, 'S')] += self.pFailure
@@ -149,9 +149,10 @@ class GridWorld:
             nextStates[self.getNextState(state, 'N')] = 0.0
             nextStates[self.getNextState(state, 'S')] = 0.0
             nextStates[self.getNextState(state, 'W')] = 0.0
-
+            
             nextStates[self.getNextState(state, 'N')] += self.pFailure
             nextStates[self.getNextState(state, 'S')] += self.pFailure
             nextStates[self.getNextState(state, 'W')] += self.pSuccess
 
         return nextStates.items()
+
