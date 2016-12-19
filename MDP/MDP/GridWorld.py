@@ -10,9 +10,12 @@ class GridWorld:
         self.pSuccess = 1.0 - (2.0 * pFailure)
         #折现因子，gama
         self.discount = discount
+        self.des=None
 
     def setCost(self,c):
         self.cost=c
+        self.des=max(self.cost, key=self.cost.get)
+        print self.des
 
 
     def getInitialState(self):
@@ -46,7 +49,7 @@ class GridWorld:
         """
         (x,y) = state
         actions = []
-        if (x,y) == (2, 0):
+        if (x,y) == self.des:
             return ['Exit']
         if (x,y) == (-1,-1):
             return ['None']
@@ -113,7 +116,7 @@ class GridWorld:
         nextStates = {}
 
         #print state
-        if state == (self.x-1, 0):
+        if state == self.des:
             nextStates[(-1,-1)] = 1.0
         elif action == 'N':
             nextStates[self.getNextState(state, 'N')] = 0.0

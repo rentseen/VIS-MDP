@@ -43,10 +43,10 @@ class ComputeEngine:
     def stringToDic(self,s):
         dic={}
         tmp=s.split(',')
-        states=self.gridworld.getStates()
-        for s in states:
-            (x,y)=s
-            dic[s]=float(tmp[x+y*3])
+        for i in range(self.gridworld.x):
+            for j in range(self.gridworld.y):
+                (x,y)=(i,j)
+                dic[(x,y)]=float(tmp[x+y*3])
         return dic
 
     # state, bestAction, value
