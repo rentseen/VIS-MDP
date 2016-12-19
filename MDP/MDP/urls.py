@@ -24,6 +24,6 @@ from MDP.views import index,computeTableJson
 
 urlpatterns = [
     url(r'^$', index),
-    url(r'^reward/depth2$',computeDepthJson),
-    url(r'^reward/gridworldtable',computeTableJson),
+    url(r'^reward/depth2/$',computeDepthJson),
+    url(r'^reward/gridworldtable/$',computeTableJson),
 ]

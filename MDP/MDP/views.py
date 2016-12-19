@@ -10,14 +10,19 @@ def index(request):
 	return render(request, 'index.html')
 
 def computeDepthJson(request):
+	request.encoding = 'utf-8'
+	if 'reward' in request.GET:
+		reward = request.GET['reward'].encode('utf-8')
+
 	computeEngine=ComputeEngine()
 	depth2=computeEngine.computeDepth2()
-	print depth2
-	result=""
-	result += json.dumps(depth2)
 	return HttpResponse(depth2)
 
 def computeTableJson(request):
+	request.encoding = 'utf-8'
+	if 'reward' in request.GET:
+		reward = request.GET['reward'].encode('utf-8')
+
 	computeEngine = ComputeEngine()
 	table = computeEngine.computeTable()
 	return HttpResponse(table)
