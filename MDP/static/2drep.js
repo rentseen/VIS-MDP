@@ -1,4 +1,4 @@
-function draw(width, height) {
+function draw(width, height,minid,maxid) {
     s = d3.select(".rep").append("svg")
 	.attr("width", 150)
         .attr("height", 150)
@@ -19,10 +19,10 @@ function draw(width, height) {
 	        .style("stroke", "#686868")
 	        .style("stroke-width", "1px")
 	        .style("fill", function(d) {
-		    if (k == 1 && j == 0) {
+		    if ((j*3+k+1)==minid) {
 			return "red";
 		    }
-		    else if (k == 2 && j == 0) {
+		    else if ((j*3+k+1)==maxid) {
 			return "green";
 		    } else {
 			return "white";

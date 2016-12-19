@@ -245,7 +245,7 @@ function initRoot(d) {
 }
 $(document).ready(function () {
   resizeSVG();
-  draw(width, height);
+  draw(width, height,2,3);
   $("#colorToggle").click(function() {
     rewardSetting = rewardSetting == 'acc' ? 'value' : 'acc';
     updateColorAndLegend(colorSetting, rewardSetting);
@@ -259,10 +259,18 @@ $(document).ready(function () {
   $("#submit").click(function() {
     // init1();
     var str1="/reward/depth2/?reward='";
-    var str2="/reward/gridworldtable/?reward='"
+    var str2="/reward/gridworldtable/?reward='";
+    var minr,minid,maxr,maxid,tt;
+    minr=parseFloat($("#box"+9).val());
+    maxr=parseFloat($("#box"+9).val());
+    minid=9;
+    maxid=9;
     for (var i=1;i<9;i++){
-        str1=str1+$("#box"+i).val()+",";
-        str2=str2+$("#box"+i).val()+",";
+        tt=parseFloat($("#box"+i).val());
+        if (tt>maxr){maxr=tt;maxid=i;}
+        if (tt<minr){minr=tt;minid=i;}
+        str1=str1+tt+",";
+        str2=str2+tt+",";
     }
     str1=str1+$("#box"+9).val()+"'";
     str2=str2+$("#box"+9).val()+"'";
@@ -290,7 +298,7 @@ $(document).ready(function () {
       radius = d3.scale.linear()
           .domain([0, 1])
           .range([0,20]);
-        draw(width, height);
+      draw(width, height,minid,maxid);
       // Display tree
       // root.children.forEach(collapse);
       initRoot(root);
