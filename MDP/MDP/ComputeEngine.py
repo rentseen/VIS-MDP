@@ -6,13 +6,11 @@ import json
 class ComputeEngine:
     def __init__(self, costString):
         costString=costString.replace("'","")
-        self.gridworld = GridWorld(3, 3, None , 0.1, 1.0)
+        self.gridworld = GridWorld(3, 3, None , 0.1, 0.3)
         cost=self.stringToDic(costString)
         self.gridworld.setCost(cost)
         self.v = self.runVI(self.gridworld)
         self.policy = self.getPolicy(self.gridworld, self.v)
-
-        pass
 
 
     def computeDepth2(self):

@@ -13,7 +13,6 @@ class GridWorld:
 
     def setCost(self,c):
         self.cost=c
-        print self.cost
 
 
     def getInitialState(self):

@@ -14,6 +14,7 @@ def computeDepthJson(request):
 	if 'reward' in request.GET:
 		reward = request.GET['reward'].encode('utf-8')
 		computeEngine = ComputeEngine(reward)
+		print "test"
 		depth2 = computeEngine.computeDepth2()
 		return HttpResponse(depth2)
 	else:

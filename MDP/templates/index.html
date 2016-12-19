@@ -259,8 +259,8 @@ $(document).ready(function () {
 
   $("#submit").click(function() {
     // init1();
-    var str1="/reward/depth2?reward='";
-    var str2="/reward/gridworldtable?reward='"
+    var str1="/reward/depth2/?reward='";
+    var str2="/reward/gridworldtable/?reward='"
     for (var i=1;i<9;i++){
         str1=str1+$("#box"+i).val()+",";
         str2=str2+$("#box"+i).val()+",";
@@ -398,8 +398,8 @@ var svg = d3.select("#container").append("svg")
 tabledata = null;
 
 // d3.json("/reward/data/gridworld.json", function(error, flare) {
-d3.json("/reward/depth2?reward='-10,-10000,100,-10,-10,-10,-10,-10,-10'", function(error, data) {
-d3.csv("/reward/gridworldtable?reward='-10,-10000,100,-10,-10,-10,-10,-10,-10'", function(error, thetabledata) {
+d3.json("/reward/depth2/?reward='-10,-10000,100,-10,-10,-10,-10,-10,-10'", function(error, data) {
+d3.csv("/reward/gridworldtable/?reward='-10,-10000,100,-10,-10,-10,-10,-10,-10'", function(error, thetabledata) {
   tabledata = thetabledata;
   root = data;
   root.x0 = height / 2 - 500;
