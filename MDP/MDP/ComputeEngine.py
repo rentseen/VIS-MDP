@@ -4,8 +4,11 @@ from GridWorld import *
 import json
 
 class ComputeEngine:
-    def __init__(self):
-        self.gridworld = GridWorld(3, 3, -10, 100, -10000, 0.1, 1.0)
+    def __init__(self, costString):
+        costString=costString.replace("'","")
+        self.gridworld = GridWorld(3, 3, None , 0.1, 1.0)
+        cost=self.stringToDic(costString)
+        self.gridworld.setCost(cost)
         self.v = self.runVI(self.gridworld)
         self.policy = self.getPolicy(self.gridworld, self.v)
 
@@ -38,6 +41,15 @@ class ComputeEngine:
                                                                             None, False, 1.0, self.v, self.policy, 5, True, 0),
                                                 indent=4)
         return gridworldpolicytreedepth5
+
+    def stringToDic(self,s):
+        dic={}
+        tmp=s.split(',')
+        states=self.gridworld.getStates()
+        for s in states:
+            (x,y)=s
+            dic[s]=float(tmp[x+y*3])
+        return dic
 
     # state, bestAction, value
     def outputStateValues(self, mdp, v):

@@ -2,18 +2,20 @@
 
 class GridWorld:
     
-    def __init__(self, x, y, cost, reward, firepitreward, pFailure, discount):
+    def __init__(self, x, y, cost, pFailure, discount):
         self.x = x
         self.y = y
         self.cost = cost
-        self.reward = reward
-        self.firepitreward = firepitreward
         self.pFailure = pFailure
         self.pSuccess = 1.0 - (2.0 * pFailure)
         #折现因子，gama
         self.discount = discount
 
-    
+    def setCost(self,c):
+        self.cost=c
+        print self.cost
+
+
     def getInitialState(self):
         """获取初始状态
         """
@@ -72,15 +74,10 @@ class GridWorld:
         """
         获取各状态的reward
         """
-        (x, y) = state
-        if (x, y) == (self.x - 1,  0):
-            return self.reward
-        if y == 0 and x > 0 and x < self.x - 1:
-            return self.firepitreward
         if self.isTerminal(state):
             return 0
         else:
-            return self.cost
+            return self.cost[state]
         
 
     #assuming the action works perfectly, what is the next state?

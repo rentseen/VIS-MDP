@@ -13,17 +13,23 @@ def computeDepthJson(request):
 	request.encoding = 'utf-8'
 	if 'reward' in request.GET:
 		reward = request.GET['reward'].encode('utf-8')
+		computeEngine = ComputeEngine(reward)
+		depth2 = computeEngine.computeDepth2()
+		return HttpResponse(depth2)
+	else:
+		return HttpResponse("failed")
 
-	computeEngine=ComputeEngine()
-	depth2=computeEngine.computeDepth2()
-	return HttpResponse(depth2)
+
 
 def computeTableJson(request):
 	request.encoding = 'utf-8'
 	if 'reward' in request.GET:
 		reward = request.GET['reward'].encode('utf-8')
+		computeEngine = ComputeEngine(reward)
+		table = computeEngine.computeTable()
+		return HttpResponse(table)
+	else:
+		return HttpResponse("failed")
 
-	computeEngine = ComputeEngine()
-	table = computeEngine.computeTable()
-	return HttpResponse(table)
+
 
