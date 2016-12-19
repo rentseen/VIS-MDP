@@ -20,5 +20,5 @@ from django.conf.urls import *
 from MDP.views import index
 
 urlpatterns = [
-    url(r'^hello/', index),
+    url(r'^$', index),
 ]
