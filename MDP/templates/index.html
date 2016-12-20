@@ -166,6 +166,41 @@ li.key {
             </div>
         </div>
   </div>
+  <div class="boxnine2">
+        <div class="boxrow">
+            <div class="boxone2">
+                <img src="/static/arrow.png" class="arrow" id="s0-2" />
+            </div>
+            <div class="boxone2">
+                <img src="/static/arrow.png" class="arrow" id="s1-2" />
+            </div>
+            <div class="boxone2">
+                <img src="/static/arrow.png" class="arrow" id="s2-2" />
+            </div>
+        </div>
+        <div class="boxrow">
+            <div class="boxone2" id="s0-1">
+                <img src="/static/arrow.png" class="arrow"  />
+            </div>
+            <div class="boxone2">
+                <img src="/static/arrow.png" class="arrow" id="s1-1" />
+            </div>
+            <div class="boxone2">
+                <img src="/static/arrow.png" class="arrow" id="s2-1" />
+            </div>
+        </div>
+        <div class="boxrow" id="s0-0">
+            <div class="boxone2">
+                <img src="/static/arrow.png" class="arrow"  />
+            </div>
+            <div class="boxone2">
+                <img src="/static/arrow.png" class="arrow" id="s1-0" />
+            </div>
+            <div class="boxone2">
+                <img src="/static/arrow.png" class="arrow" id="s2-0" />
+            </div>
+        </div>
+  </div>
   <button id="submit">Submit</button>
   <div id="legends">
     <button id="colorToggle">Toggle color</button>
@@ -280,7 +315,7 @@ $(document).ready(function () {
       root = data;
       root.x0 = height / 2 - 500;
       root.y0 = 0;
-
+      var nowstate,bestway;
       // Find value range
       for (j = 0; j < tabledata.length; j++) {
         row = tabledata[j];
@@ -288,6 +323,12 @@ $(document).ready(function () {
         valRange.min = (v < valRange.min) ? v : valRange.min;
         valRange.max = (v > valRange.max) ? v : valRange.max;
         valList[v] = true;
+        nowstate = row['state2'];
+        bestway = row['bestAction'];
+
+        if (bestway=="N") {$("#"+nowstate).css("transform","rotate(-90deg)");}
+        if (bestway=="W") {$("#"+nowstate).css("transform","rotate(-180deg)");}
+        if (bestway=="S") {$("#"+nowstate).css("transform","rotate(90deg)");}
       }
 
 
@@ -373,12 +414,18 @@ d3.csv("/reward/gridworldtable/?reward='-10,-10000,100,-10,-10,-10,-10,-10,-10'"
   root.y0 = 0;
 
   // Find value range
+  var nowstate,bestway;
   for (j = 0; j < tabledata.length; j++) {
     row = tabledata[j];
     v = parseFloat(row['value']);
     valRange.min = (v < valRange.min) ? v : valRange.min;
     valRange.max = (v > valRange.max) ? v : valRange.max;
     valList[v] = true;
+    nowstate = row['state2'];
+    bestway = row['bestAction'];
+    if (bestway=="N") {$("#"+nowstate).css("transform","rotate(-90deg)");}
+    if (bestway=="W") {$("#"+nowstate).css("transform","rotate(-180deg)");}
+    if (bestway=="S") {$("#"+nowstate).css("transform","rotate(90deg)");}
   }
 
 
