@@ -1,6 +1,8 @@
 # VIS-MDP
 
-This is the course project of Computer Animation and Data Visualization
+This is the course project of Computer Animation and Data Visualization.
+
+Our work is to improve the work of [Visualization of MDPs](https://github.com/CSE512-14W/fp-c1-bragg). So we used the code of them.
 
 Team member: Yelinsheng, Xiaolong Huang
 
