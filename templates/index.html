@@ -179,8 +179,8 @@ li.key {
             </div>
         </div>
         <div class="boxrow">
-            <div class="boxone2" id="s0-1">
-                <img src="/static/arrow.png" class="arrow"  />
+            <div class="boxone2">
+                <img src="/static/arrow.png" class="arrow" id="s0-1"/>
             </div>
             <div class="boxone2">
                 <img src="/static/arrow.png" class="arrow" id="s1-1" />
@@ -189,12 +189,12 @@ li.key {
                 <img src="/static/arrow.png" class="arrow" id="s2-1" />
             </div>
         </div>
-        <div class="boxrow" id="s0-0">
+        <div class="boxrow">
             <div class="boxone2">
-                <img src="/static/arrow.png" class="arrow"  />
+                <img src="/static/arrow.png" class="arrow" id="s0-0"/>
             </div>
             <div class="boxone2">
-                <img src="/static/arrow.png" class="arrow" id="s1-0" />
+                <img src="/static/arrow.png" class="arrow" id="s1-0"/>
             </div>
             <div class="boxone2">
                 <img src="/static/arrow.png" class="arrow" id="s2-0" />
@@ -325,7 +325,7 @@ $(document).ready(function () {
         valList[v] = true;
         nowstate = row['state2'];
         bestway = row['bestAction'];
-
+        if (bestway=="E") {$("#"+nowstate).css("transform","rotate(0deg)");}
         if (bestway=="N") {$("#"+nowstate).css("transform","rotate(-90deg)");}
         if (bestway=="W") {$("#"+nowstate).css("transform","rotate(-180deg)");}
         if (bestway=="S") {$("#"+nowstate).css("transform","rotate(90deg)");}
